@@ -46,7 +46,7 @@ size_t get_num_elements(nvinfer1::Dims dims) {
 
 template <typename Data>
 int FancyActivationPlugin::doEnqueue(int batchSize,
-                                         const void *const *inputs, void **outputs,
+                                         const void *const *inputs, void *const *outputs,
                                          void *workspace, cudaStream_t stream) {
   size_t num_elements = batchSize * get_num_elements(this->getInputDims(0));
 
@@ -82,13 +82,13 @@ int FancyActivationPlugin::doEnqueue(int batchSize,
 }
 
 int FancyActivationPlugin::enqueue(int batchSize,
-                                   const void *const *inputs, void **outputs,
-                                   void *workspace, cudaStream_t stream) {
+                                   const void *const *inputs, void *const *outputs,
+                                   void *workspace, cudaStream_t stream) noexcept{
   if (getDataType()==nvinfer1::DataType::kFLOAT) {				
     return doEnqueue<float>(batchSize, inputs, outputs, workspace, stream);
   } else {
 #if CUDART_VERSION < 9000
-    throw std::runtime_error("FP16 plugin is not support for CUDA < 9.0");
+//    throw std::runtime_error("FP16 plugin is not support for CUDA < 9.0");
 #else    
     return doEnqueue<__half>(batchSize, inputs, outputs, workspace, stream);
 #endif  
@@ -96,6 +96,6 @@ int FancyActivationPlugin::enqueue(int batchSize,
 }
 
 bool FancyActivationPlugin::supportsFormat(nvinfer1::DataType type,
-                                           nvinfer1::PluginFormat format) const {
+                                           nvinfer1::PluginFormat format) const noexcept{
   return (type == nvinfer1::DataType::kFLOAT || type == nvinfer1::DataType::kHALF);
 }

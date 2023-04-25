@@ -58,12 +58,12 @@ protected:
     deserialize_value(&serialData, &serialLength, &_alpha);
     deserialize_value(&serialData, &serialLength, &_gamma);
   }
-  size_t getSerializationSize() override {
+  size_t getSerializationSize() const noexcept override {
     return (serialized_size(_activation_type) +
             serialized_size(_alpha) +
             serialized_size(_gamma)) + getBaseSerializationSize();
   }
-  void serialize(void *buffer) override {
+  void serialize(void *buffer) const noexcept override {
     serializeBase(buffer);
     serialize_value(&buffer, (int)_activation_type);
     serialize_value(&buffer, _alpha);
@@ -75,24 +75,24 @@ public:
   FancyActivationPlugin(void const* serialData, size_t serialLength) {
     this->deserialize(serialData, serialLength);
   }
-  virtual const char* getPluginType() const override { return "FancyActivation"; }
-  virtual int getNbOutputs() const override { return 1; }
+  virtual const char* getPluginType() const noexcept override { return "FancyActivation"; }
+  virtual int getNbOutputs() const noexcept override { return 1; }
   virtual nvinfer1::Dims getOutputDimensions(int index,
                                              const nvinfer1::Dims *inputDims,
-                                             int nbInputs) override {
+                                             int nbInputs) noexcept override {
     assert(index == 0);
     assert(inputDims);
     assert(nbInputs == 1);
     return *inputDims;
   }
   bool supportsFormat(nvinfer1::DataType type,
-                      nvinfer1::PluginFormat format) const override;
+                      nvinfer1::PluginFormat format) const noexcept override;
 
   int enqueue(int batchSize,
-              const void *const *inputs, void **outputs,
-              void *workspace, cudaStream_t stream) override;
+              const void *const *inputs, void *const *outputs,
+              void *workspace, cudaStream_t stream) noexcept override;
   template <typename Data>
     int doEnqueue(int batchSize,
-                  const void *const *inputs, void **outputs,
+                  const void *const *inputs, void *const *outputs,
                   void *workspace, cudaStream_t stream);
 };
